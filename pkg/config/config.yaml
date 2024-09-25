@@ -1,0 +1,6 @@
+enviroment: development
+
+http_port: 6060
+auth_secret: qweqweqw
+
+database_uri: postgres://postgres:1234@localhost:5432/database
