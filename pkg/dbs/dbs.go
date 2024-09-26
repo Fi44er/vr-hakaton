@@ -27,11 +27,11 @@ type Database struct {
 }
 
 type Query struct {
-	Query string
+	Query []string
 	Args  []any
 }
 
-func NewQuery(query string, args ...any) Query {
+func NewQuery(query []string, args ...any) Query {
 	return Query{
 		Query: query,
 		Args:  args,
@@ -58,75 +58,74 @@ func NewDatabase(uri string) (*Database, error) {
 }
 
 func (d *Database) GetDB() *gorm.DB {
-  return d.db
+	return d.db
 }
 
 func (d *Database) AutoMigrate(models ...any) error {
-  return d.db.AutoMigrate(models...)
+	return d.db.AutoMigrate(models...)
 }
 
 func (d *Database) Create(ctx context.Context, doc any) error {
-  ctx, cancel := context.WithTimeout(ctx, DatabaseTimeout)
-  defer cancel()
+	ctx, cancel := context.WithTimeout(ctx, DatabaseTimeout)
+	defer cancel()
 
-  return d.db.Create(doc).Error
+	return d.db.Create(doc).Error
 }
 
 func (d *Database) Update(ctx context.Context, doc any) error {
-  ctx, cancel := context.WithTimeout(ctx, DatabaseTimeout)
-  defer cancel()
+	ctx, cancel := context.WithTimeout(ctx, DatabaseTimeout)
+	defer cancel()
 
-  return d.db.Save(doc).Error
+	return d.db.Save(doc).Error
 }
 
 func (d *Database) Delete(ctx context.Context, value any, opts ...FindOption) error {
-  ctx, cancel := context.WithTimeout(ctx, DatabaseTimeout)
-  defer cancel()
+	ctx, cancel := context.WithTimeout(ctx, DatabaseTimeout)
+	defer cancel()
 
-  query := d.applyOptions(opts...)
-  return query.Delete(value).Error
+	query := d.applyOptions(opts...)
+	return query.Delete(value).Error
 }
 
 func (d *Database) FindByID(ctx context.Context, id any, result any) error {
-  ctx, cancel := context.WithTimeout(ctx, DatabaseTimeout)
-  defer cancel()
+	ctx, cancel := context.WithTimeout(ctx, DatabaseTimeout)
+	defer cancel()
 
-  if err := d.db.Where("id = ?", id).First(result).Error; err != nil {
-    return err
-  }
+	if err := d.db.Where("id = ?", id).First(result).Error; err != nil {
+		return err
+	}
 
-  return nil
+	return nil
 }
 
 func (d *Database) FindOne(ctx context.Context, result any, opts ...FindOption) error {
-  ctx, cancel := context.WithTimeout(ctx, DatabaseTimeout)
-  defer cancel()
+	ctx, cancel := context.WithTimeout(ctx, DatabaseTimeout)
+	defer cancel()
 
-  query := d.applyOptions(opts...)
-  if err := query.First(result).Error; err != nil {
-    return err
-  }
+	query := d.applyOptions(opts...)
+	if err := query.First(result).Error; err != nil {
+		return err
+	}
 
-  return nil
+	return nil
 }
 
 func (d *Database) Find(ctx context.Context, result any, opts ...FindOption) error {
-  ctx, cancel := context.WithTimeout(ctx, DatabaseTimeout)
-  defer cancel()
+	ctx, cancel := context.WithTimeout(ctx, DatabaseTimeout)
+	defer cancel()
 
-  query := d.applyOptions(opts...)
-  if err := query.Find(result).Error; err != nil {
-    return err
-  }
+	query := d.applyOptions(opts...)
+	if err := query.Find(result).Error; err != nil {
+		return err
+	}
 
-  return nil
+	return nil
 }
 
 func (d *Database) applyOptions(opts ...FindOption) *gorm.DB {
 	query := d.db
 
 	opt := getOption(opts...)
-
 	if len(opt.preloads) != 0 {
 		for _, preload := range opt.preloads {
 			query = query.Preload(preload)
@@ -134,8 +133,8 @@ func (d *Database) applyOptions(opts ...FindOption) *gorm.DB {
 	}
 
 	if opt.query != nil {
-		for _, q := range opt.query {
-			query = query.Where(q.Query, q.Args)
+		for index, q := range opt.query {
+			query = query.Where(q.Query[index], q.Args[index])
 		}
 	}
 

@@ -1,6 +1,19 @@
 package eventbus
 
-// UserRegisteredEvent is triggered when a user registers.
+import (
+	"context"
+	"root/internal/team/model"
+)
+
 type OrderRegisteredEvent struct {
-	Email string
+	TeamName   string
+	ResultChan chan Result // Канал для возврата результата
+	OrderRole  string
+	Context    context.Context
+}
+
+// Result содержит команду и ошибку для возврата
+type Result struct {
+	Team  *model.Team
+	Error error
 }

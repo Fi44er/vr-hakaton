@@ -7,7 +7,6 @@ import (
 	"root/internal/eventbus"
 	orderModel "root/internal/order/model"
 	httpServer "root/internal/server/http"
-	"root/internal/team/service"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2/log"
@@ -25,20 +24,7 @@ func main() {
 		log.Fatal("Database migration fail", err)
 	}
 
-  eventBus := eventbus.New()
-
-  teamService := service.NewTeamService()
-  teamChanel := make(chan interface{})
-  eventBus.Subscribe("order.registred", teamChanel)
-
-  go func() {
-    for event := range teamChanel {
-      teamService.HandleOrderRegistred(event)
-    }
-  }()
-
-
-
+	eventBus := eventbus.New()
 
 	validator := validator.New()
 	httpSvr := httpServer.NewServer(*validator, db, eventBus)

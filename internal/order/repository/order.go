@@ -8,7 +8,7 @@ import (
 
 type IOrderRepository interface {
 	Create(ctx context.Context, order *model.Order) error
-	FindByEmail(ctx context.Context, email string) (*model.Order, error)
+	FindByEmailOrPhone(ctx context.Context, email string, phone string) (*model.Order, error)
 }
 
 type OrderRepo struct {
@@ -23,11 +23,11 @@ func (r *OrderRepo) Create(ctx context.Context, order *model.Order) error {
 	return r.db.Create(ctx, order)
 }
 
-func (r *OrderRepo) FindByEmail(ctx context.Context, email string) (*model.Order, error) {
+func (r *OrderRepo) FindByEmailOrPhone(ctx context.Context, email string, phone string) (*model.Order, error) {
 	order := new(model.Order)
-	query := dbs.NewQuery("email = ?", email)
+	query := dbs.NewQuery([]string{"email = ?", "OR phone_number = ?"}, email, phone)
 	if err := r.db.Find(ctx, order, dbs.WithQuery(query)); err != nil {
-    return nil, err
+		return nil, err
 	}
-  return order, nil
+	return order, nil
 }

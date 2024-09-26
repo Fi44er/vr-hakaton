@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"root/internal/eventbus"
 	orderHTTP "root/internal/order/port/http"
+	teamHTTP "root/internal/team/port/http"
 	"root/pkg/config"
 	"root/pkg/dbs"
 	"root/pkg/response"
@@ -18,7 +19,7 @@ type Server struct {
 	cfg       *config.Schema
 	db        dbs.IDatabase
 	validator validator.Validate
-  eventBus *eventbus.EventBus
+	eventBus  *eventbus.EventBus
 }
 
 func NewServer(validator validator.Validate, db dbs.IDatabase, eventBus *eventbus.EventBus) *Server {
@@ -27,7 +28,7 @@ func NewServer(validator validator.Validate, db dbs.IDatabase, eventBus *eventbu
 		cfg:       config.GetConfig(),
 		db:        db,
 		validator: validator,
-    eventBus: eventBus,
+		eventBus:  eventBus,
 	}
 }
 
@@ -62,6 +63,7 @@ func (s Server) GetApp() *fiber.App {
 func (s Server) MapRoutes() error {
 	v1 := s.app.Group("/api/v1")
 	// userHttp.Routes(v1, s.db, s.validator)
-  orderHTTP.Routes(v1, s.db, s.validator, s.eventBus)
+	orderHTTP.Routes(v1, s.db, s.validator, s.eventBus)
+	teamHTTP.Routes(v1, s.db, s.validator, s.eventBus)
 	return nil
 }
