@@ -7,6 +7,7 @@ import (
 	"root/internal/eventbus"
 	orderModel "root/internal/order/model"
 	httpServer "root/internal/server/http"
+  teamModel "root/internal/team/model"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2/log"
@@ -20,7 +21,7 @@ func main() {
 		log.Fatal("Cannot connnect to database", err)
 	}
 
-	if err = db.AutoMigrate(&orderModel.Order{}); err != nil {
+	if err = db.AutoMigrate(&teamModel.Team{}, &orderModel.Order{}); err != nil {
 		log.Fatal("Database migration fail", err)
 	}
 

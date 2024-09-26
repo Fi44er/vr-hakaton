@@ -6,6 +6,7 @@ import (
 	"root/internal/order/dto"
 	"root/internal/order/model"
 	"root/internal/order/repository"
+	"root/pkg/mailer"
 	"root/pkg/response"
 	"root/pkg/utils"
 
@@ -42,6 +43,10 @@ func (s *OrderService) Register(ctx context.Context, req *dto.RegisterReq) (*mod
 
 	if req.Role == "maintainer" {
 		// Create a new team
+		if req.Age < 18 {
+			return nil, &response.ErrorResponse{StatusCode: 400, Message: "The age of the maintainer person is from 18 years old"}
+		}
+
 		s.eventBus.Publish("order.registred", eventbus.OrderRegisteredEvent{TeamName: req.TeamName, ResultChan: resultChan, OrderRole: "maintainer", Context: ctx})
 		result := <-resultChan
 		if result.Error != nil {
@@ -52,6 +57,10 @@ func (s *OrderService) Register(ctx context.Context, req *dto.RegisterReq) (*mod
 		}
 		order.TeamID = result.Team.ID
 	} else {
+
+		if req.Age < 11 || req.Age > 18 {
+			return nil, &response.ErrorResponse{StatusCode: 400, Message: "Unacceptable age"}
+		}
 		// Check if the team exists
 		s.eventBus.Publish("order.registred", eventbus.OrderRegisteredEvent{TeamName: req.TeamName, ResultChan: resultChan, OrderRole: "participant", Context: ctx})
 		result := <-resultChan
@@ -77,6 +86,8 @@ func (s *OrderService) Register(ctx context.Context, req *dto.RegisterReq) (*mod
 	if err := s.repo.Create(ctx, order); err != nil {
 		return nil, err
 	}
+
+	mailer.Mailer([]string{req.Email}, req.FIO, req.TeamName)
 
 	return order, nil
 }

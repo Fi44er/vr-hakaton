@@ -65,6 +65,19 @@ func (s *TeamService) HandleOrderRegistred(event interface{}) {
 				return
 			}
 
+			team, err := s.GetWhithPreload(e.Context, e.TeamName)
+      if err != nil {
+        e.ResultChan <- eventbus.Result{Team: nil, Error: err}
+				return
+      }
+
+      if len(team.Orders) == 4 {
+        	message := fmt.Sprintf("the team %s is staffed", e.TeamName)
+				e.ResultChan <- eventbus.Result{Team: nil, Error: &response.ErrorResponse{StatusCode: 409, Message: message, Err: nil}}
+				return
+
+      }
+
 			e.ResultChan <- eventbus.Result{Team: existingTeam, Error: nil}
 		}
 	}
@@ -75,6 +88,8 @@ func (s *TeamService) GetWhithPreload(ctx context.Context, name string) (*model.
 	if err != nil {
 		return nil, err
 	}
-
+	if team.ID == "" {
+		return nil, &response.ErrorResponse{StatusCode: 404, Message: "Team not found", Err: nil}
+	}
 	return team, nil
 }
