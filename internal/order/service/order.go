@@ -87,7 +87,7 @@ func (s *OrderService) Register(ctx context.Context, req *dto.RegisterReq) (*mod
 		return nil, err
 	}
 
-	mailer.Mailer([]string{req.Email}, req.FIO, req.TeamName)
+	mailer.Mailer([]string{req.Email}, req.FIO, req.TeamName, order.TeamID)
 
 	return order, nil
 }

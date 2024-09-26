@@ -11,10 +11,11 @@ import (
 type EmailData struct {
 	Name     string
 	TeamName string
+	TeamID   string
 }
 
 // Функция для отправки письма с HTML-шаблоном
-func Mailer(mails []string, fio string, teamName string) {
+func Mailer(mails []string, fio string, teamName string, teamID string) {
 
 	smtpHost := "smtp.gmail.com"
 	smtpPort := "587"
@@ -30,6 +31,7 @@ func Mailer(mails []string, fio string, teamName string) {
 	data := EmailData{
 		Name:     fio, // Вы можете передавать имя пользователя динамически
 		TeamName: teamName,
+    TeamID: teamID,
 	}
 
 	// Чтение HTML-шаблона
