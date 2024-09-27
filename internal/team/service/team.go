@@ -49,6 +49,7 @@ func (s *TeamService) HandleOrderRegistred(event interface{}) {
 
 			newTeam := &model.Team{
 				TeamName: e.TeamName,
+				Track:    model.Track(e.Track),
 			}
 
 			// Сохранение команды в базе данных

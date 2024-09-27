@@ -38,15 +38,16 @@ func (s Server) Run() error {
 	//	s.app.Config().Production = true
 	// }
 
+	s.app.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost:5173", // allow requests from your frontend
+		AllowMethods: "GET,POST,HEAD,PUT,DELETE,OPTIONS",
+	}))
+
 	if err := s.MapRoutes(); err != nil {
 		log.Fatalf("MapRoutes Error: %v", err)
 	}
 
 	// s.app.Get("/swagger/*any", fiberSwagger.WrapHandler(swaggerFiles.Handler))
-	s.app.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
-		AllowHeaders: "Origin, Content-Type, Accept",
-	}))
 
 	s.app.Get("/health", func(c *fiber.Ctx) error {
 		response.JSON(c, 200, nil)

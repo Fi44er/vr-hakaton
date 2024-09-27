@@ -10,6 +10,7 @@ type OrderRegisteredEvent struct {
 	ResultChan chan Result // Канал для возврата результата
 	OrderRole  string
 	Context    context.Context
+	Track      string
 }
 
 // Result содержит команду и ошибку для возврата

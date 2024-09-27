@@ -10,6 +10,7 @@ type Role string
 const (
 	Participant Role = "participant"
 	Maintainer  Role = "maintainer"
+	Captain     Role = "captain"
 )
 
 type Order struct {

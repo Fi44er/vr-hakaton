@@ -47,7 +47,7 @@ func (s *OrderService) Register(ctx context.Context, req *dto.RegisterReq) (*mod
 			return nil, &response.ErrorResponse{StatusCode: 400, Message: "The age of the maintainer person is from 18 years old"}
 		}
 
-		s.eventBus.Publish("order.registred", eventbus.OrderRegisteredEvent{TeamName: req.TeamName, ResultChan: resultChan, OrderRole: "maintainer", Context: ctx})
+		s.eventBus.Publish("order.registred", eventbus.OrderRegisteredEvent{TeamName: req.TeamName, ResultChan: resultChan, OrderRole: "maintainer", Context: ctx, Track: string(req.Track)})
 		result := <-resultChan
 		if result.Error != nil {
 			return nil, result.Error
@@ -57,7 +57,6 @@ func (s *OrderService) Register(ctx context.Context, req *dto.RegisterReq) (*mod
 		}
 		order.TeamID = result.Team.ID
 	} else {
-
 		if req.Age < 11 || req.Age > 18 {
 			return nil, &response.ErrorResponse{StatusCode: 400, Message: "Unacceptable age"}
 		}
