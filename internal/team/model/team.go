@@ -10,9 +10,9 @@ import (
 type Track string
 
 const (
-	Participant Track = "participant"
-	Maintainer  Track = "maintainer"
-	Captain     Track = "captain"
+	AR     Track = "AR"
+	ThreeD Track = "3D"
+	VR     Track = "VR"
 )
 
 type Team struct {

@@ -25,7 +25,12 @@ func (r *OrderRepo) Create(ctx context.Context, order *model.Order) error {
 
 func (r *OrderRepo) FindByEmailOrPhone(ctx context.Context, email string, phone string) (*model.Order, error) {
 	order := new(model.Order)
-	query := dbs.NewQuery([]string{"email = ?", "OR phone_number = ?"}, email, phone)
+	query := dbs.NewQuery("email = ?", email)
+	if err := r.db.Find(ctx, order, dbs.WithQuery(query)); err != nil {
+		return nil, err
+	}
+
+	query = dbs.NewQuery("phone_number  = ?", phone)
 	if err := r.db.Find(ctx, order, dbs.WithQuery(query)); err != nil {
 		return nil, err
 	}

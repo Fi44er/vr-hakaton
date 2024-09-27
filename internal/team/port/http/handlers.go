@@ -20,7 +20,10 @@ func NewOrderHandler(service service.ITeamService) *TeamHandler {
 
 func (h *TeamHandler) GetWhithPreload(ctx *fiber.Ctx) error {
 	context := ctx.UserContext()
+	// params := ctx.Queries()
 	name := ctx.Query("name")
+	// filter := dto.TeamFilterParam{}
+	// mapstructure.Decode(params, &filter)
 
 	team, err := h.service.GetWhithPreload(context, name)
 	if err != nil {

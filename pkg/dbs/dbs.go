@@ -27,11 +27,11 @@ type Database struct {
 }
 
 type Query struct {
-	Query []string
-	Args  []any
+	Query string
+	Args  any
 }
 
-func NewQuery(query []string, args ...any) Query {
+func NewQuery(query string, args ...any) Query {
 	return Query{
 		Query: query,
 		Args:  args,
@@ -115,6 +115,7 @@ func (d *Database) Find(ctx context.Context, result any, opts ...FindOption) err
 	defer cancel()
 
 	query := d.applyOptions(opts...)
+	query = query.Debug()
 	if err := query.Find(result).Error; err != nil {
 		return err
 	}
@@ -133,8 +134,8 @@ func (d *Database) applyOptions(opts ...FindOption) *gorm.DB {
 	}
 
 	if opt.query != nil {
-		for index, q := range opt.query {
-			query = query.Where(q.Query[index], q.Args[index])
+		for _, q := range opt.query {
+			query = query.Where(q.Query, q.Args)
 		}
 	}
 

@@ -39,7 +39,7 @@ func (s Server) Run() error {
 	// }
 
 	s.app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:5173", // allow requests from your frontend
+		AllowOrigins: "*", // allow requests from your frontend
 		AllowMethods: "GET,POST,HEAD,PUT,DELETE,OPTIONS",
 	}))
 

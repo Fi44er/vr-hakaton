@@ -11,6 +11,7 @@ import (
 	"root/pkg/utils"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2/log"
 )
 
 type IOrderService interface {
@@ -34,6 +35,17 @@ func NewOrderService(validator validator.Validate, repo repository.IOrderReposit
 func (s *OrderService) Register(ctx context.Context, req *dto.RegisterReq) (*model.Order, error) {
 	if err := s.validator.Struct(req); err != nil {
 		return nil, &response.ErrorResponse{StatusCode: 400, Message: "Invalid params", Err: err}
+	}
+
+	existOrder, err := s.repo.FindByEmailOrPhone(ctx, req.Email, req.PhoneNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Info(existOrder)
+
+	if existOrder.ID != "" {
+		return nil, &response.ErrorResponse{StatusCode: 409, Message: "A user with such an email or phone number already exists", Err: err}
 	}
 
 	order := new(model.Order)
@@ -72,15 +84,6 @@ func (s *OrderService) Register(ctx context.Context, req *dto.RegisterReq) (*mod
 		order.TeamID = result.Team.ID
 	}
 	close(resultChan)
-
-	existOrder, err := s.repo.FindByEmailOrPhone(ctx, req.Email, req.PhoneNumber)
-	if err != nil {
-		return nil, err
-	}
-
-	if existOrder.Email != "" {
-		return nil, &response.ErrorResponse{StatusCode: 409, Message: "A user with such an email or phone number already exists", Err: err}
-	}
 
 	if err := s.repo.Create(ctx, order); err != nil {
 		return nil, err

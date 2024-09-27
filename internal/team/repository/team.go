@@ -26,7 +26,19 @@ func (r *TeamRepo) Create(ctx context.Context, team *model.Team) error {
 func (r *TeamRepo) FindByName(ctx context.Context, name string) (*model.Team, error) {
 	team := new(model.Team)
 	opts := []dbs.FindOption{
-		dbs.WithQuery(dbs.NewQuery([]string{"team_name = ?"}, name)),
+		dbs.WithQuery(dbs.NewQuery("team_name = ?", name)),
+		dbs.WithPreload([]string{"Orders"}),
+	}
+	// query := dbs.NewQuery([]string{"team_name = ?"}, name)
+	if err := r.db.Find(ctx, team, opts...); err != nil {
+		return nil, err
+	}
+	return team, nil
+}
+
+func (r *TeamRepo) FindAll(ctx context.Context) (*model.Team, error) {
+	team := new(model.Team)
+	opts := []dbs.FindOption{
 		dbs.WithPreload([]string{"Orders"}),
 	}
 	// query := dbs.NewQuery([]string{"team_name = ?"}, name)
