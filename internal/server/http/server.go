@@ -40,7 +40,8 @@ func (s Server) Run() error {
 
 	s.app.Use(cors.New(cors.Config{
 		AllowOrigins: "*", // allow requests from your frontend
-		AllowMethods: "GET,POST,HEAD,PUT,DELETE,OPTIONS",
+		// AllowMethods: "GET,POST,HEAD,PUT,DELETE,OPTIONS",
+		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
 	if err := s.MapRoutes(); err != nil {
