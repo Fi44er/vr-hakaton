@@ -66,17 +66,17 @@ func (s *TeamService) HandleOrderRegistred(event interface{}) {
 			}
 
 			team, err := s.GetWhithPreload(e.Context, e.TeamName)
-      if err != nil {
-        e.ResultChan <- eventbus.Result{Team: nil, Error: err}
+			if err != nil {
+				e.ResultChan <- eventbus.Result{Team: nil, Error: err}
 				return
-      }
+			}
 
-      if len(team.Orders) == 4 {
-        	message := fmt.Sprintf("the team %s is staffed", e.TeamName)
+			if len(team.Orders) == 4 {
+				message := fmt.Sprintf("the team %s is staffed", e.TeamName)
 				e.ResultChan <- eventbus.Result{Team: nil, Error: &response.ErrorResponse{StatusCode: 409, Message: message, Err: nil}}
 				return
 
-      }
+			}
 
 			e.ResultChan <- eventbus.Result{Team: existingTeam, Error: nil}
 		}

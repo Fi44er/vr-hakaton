@@ -12,6 +12,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 type Server struct {
@@ -42,6 +43,10 @@ func (s Server) Run() error {
 	}
 
 	// s.app.Get("/swagger/*any", fiberSwagger.WrapHandler(swaggerFiles.Handler))
+	s.app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
 
 	s.app.Get("/health", func(c *fiber.Ctx) error {
 		response.JSON(c, 200, nil)
