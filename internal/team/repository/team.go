@@ -8,7 +8,11 @@ import (
 
 type ITeamRepository interface {
 	Create(ctx context.Context, order *model.Team) error
+	GetById(ctx context.Context, id string) (*model.Team, error)
 	FindByName(ctx context.Context, name string) (*model.Team, error)
+	FindAll(ctx context.Context) ([]*model.Team, error)
+	Update(ctx context.Context, req *model.Team) error
+	Delete(ctx context.Context, id string) error
 }
 
 type TeamRepo struct {
@@ -36,14 +40,32 @@ func (r *TeamRepo) FindByName(ctx context.Context, name string) (*model.Team, er
 	return team, nil
 }
 
-func (r *TeamRepo) FindAll(ctx context.Context) (*model.Team, error) {
-	team := new(model.Team)
+func (r *TeamRepo) GetById(ctx context.Context, id string) (*model.Team, error) {
+	order := new(model.Team)
+	query := dbs.NewQuery("id  = ?", id)
+	if err := r.db.Find(ctx, order, dbs.WithQuery(query)); err != nil {
+		return nil, err
+	}
+	return order, nil
+}
+
+func (r *TeamRepo) FindAll(ctx context.Context) ([]*model.Team, error) {
+	teams := make([]*model.Team, 0)
 	opts := []dbs.FindOption{
 		dbs.WithPreload([]string{"Orders"}),
 	}
-	// query := dbs.NewQuery([]string{"team_name = ?"}, name)
-	if err := r.db.Find(ctx, team, opts...); err != nil {
+	if err := r.db.Find(ctx, &teams, opts...); err != nil {
 		return nil, err
 	}
-	return team, nil
+	return teams, nil
+}
+
+func (r *TeamRepo) Update(ctx context.Context, order *model.Team) error {
+	return r.db.Update(ctx, order)
+}
+
+func (r *TeamRepo) Delete(ctx context.Context, id string) error {
+	team := new(model.Team)
+	query := dbs.NewQuery("id = ?", id)
+	return r.db.Delete(ctx, team, dbs.WithQuery(query))
 }

@@ -14,3 +14,9 @@ type RegisterReq struct {
 	TeamName    string          `json:"team_name" validate:"required"`
 	Track       teamModel.Track `json:"track" validate:"required"`
 }
+
+type UpdateOrderReq struct {
+	FIO         string `json:"fio,omitempty"`
+	PhoneNumber string `json:"phone_number,omitempty"`
+	Email       string `json:"email,omitempty"`
+}

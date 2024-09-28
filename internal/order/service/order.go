@@ -14,8 +14,12 @@ import (
 	"github.com/gofiber/fiber/v2/log"
 )
 
+const ORGANIZER_EMAIL = "ekaterina.dubskaya@yandex.ru"
+
 type IOrderService interface {
 	Register(ctx context.Context, req *dto.RegisterReq) (*model.Order, error)
+	Update(ctx context.Context, id string, req *dto.UpdateOrderReq) (*model.Order, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type OrderService struct {
@@ -42,8 +46,6 @@ func (s *OrderService) Register(ctx context.Context, req *dto.RegisterReq) (*mod
 		return nil, err
 	}
 
-	log.Info(existOrder)
-
 	if existOrder.ID != "" {
 		return nil, &response.ErrorResponse{StatusCode: 409, Message: "A user with such an email or phone number already exists", Err: err}
 	}
@@ -59,7 +61,7 @@ func (s *OrderService) Register(ctx context.Context, req *dto.RegisterReq) (*mod
 			return nil, &response.ErrorResponse{StatusCode: 400, Message: "The age of the maintainer person is from 18 years old"}
 		}
 
-		s.eventBus.Publish("order.registred", eventbus.OrderRegisteredEvent{TeamName: req.TeamName, ResultChan: resultChan, OrderRole: "maintainer", Context: ctx, Track: string(req.Track)})
+		s.eventBus.Publish("order.registred", eventbus.OrderRegisteredEvent{TeamName: req.TeamName, ResultChan: resultChan, OrderRole: string(req.Role), Context: ctx, Track: string(req.Track)})
 		result := <-resultChan
 		if result.Error != nil {
 			return nil, result.Error
@@ -73,7 +75,7 @@ func (s *OrderService) Register(ctx context.Context, req *dto.RegisterReq) (*mod
 			return nil, &response.ErrorResponse{StatusCode: 400, Message: "Unacceptable age"}
 		}
 		// Check if the team exists
-		s.eventBus.Publish("order.registred", eventbus.OrderRegisteredEvent{TeamName: req.TeamName, ResultChan: resultChan, OrderRole: "participant", Context: ctx})
+		s.eventBus.Publish("order.registred", eventbus.OrderRegisteredEvent{TeamName: req.TeamName, ResultChan: resultChan, OrderRole: string(req.Role), Context: ctx})
 		result := <-resultChan
 		if result.Error != nil {
 			return nil, result.Error
@@ -89,7 +91,48 @@ func (s *OrderService) Register(ctx context.Context, req *dto.RegisterReq) (*mod
 		return nil, err
 	}
 
-	mailer.Mailer([]string{req.Email}, req.FIO, req.TeamName, order.TeamID)
+	mailer.Mailer([]string{req.Email, ORGANIZER_EMAIL}, req.FIO, req.TeamName, order.TeamID)
 
 	return order, nil
+}
+
+func (s *OrderService) Update(ctx context.Context, id string, req *dto.UpdateOrderReq) (*model.Order, error) {
+	order, err := s.repo.GetById(ctx, id)
+	if err != nil {
+		log.Errorf("Update.GetById fail, id: %s, error: %s", id, err)
+		return nil, err
+	}
+
+	if order.ID == "" {
+		return nil, &response.ErrorResponse{StatusCode: 404, Message: "Order not found", Err: err}
+	}
+
+	if req.Email != "" || req.PhoneNumber != "" {
+		existOrder, err := s.repo.FindByEmailOrPhone(ctx, req.Email, req.PhoneNumber)
+		if err != nil {
+			return nil, err
+		}
+
+		if existOrder.ID != "" {
+			return nil, &response.ErrorResponse{StatusCode: 409, Message: "A user with such an email or phone number already exists", Err: err}
+		}
+	}
+
+	utils.Copy(order, req)
+
+	if err := s.repo.Update(ctx, order); err != nil {
+		log.Errorf("Update fail, id: %s, error: %s", id, err)
+		return nil, err
+	}
+
+	return order, nil
+}
+
+func (s *OrderService) Delete(ctx context.Context, id string) error {
+	if err := s.repo.Delete(ctx, id); err != nil {
+		log.Errorf("Delete fail, id: %s, error: %s", id, err)
+		return err
+	}
+
+	return nil
 }

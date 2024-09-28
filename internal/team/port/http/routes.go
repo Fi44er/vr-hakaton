@@ -26,4 +26,7 @@ func Routes(r fiber.Router, db dbs.IDatabase, validator validator.Validate, even
 
 	team := r.Group("team")
 	team.Get("/get-whith-preload", teamHandler.GetWhithPreload)
+	team.Get("/get-all", teamHandler.GetAll)
+	team.Put("/update/:id", teamHandler.Update)
+	team.Delete("/delete/:id", teamHandler.Delete)
 }

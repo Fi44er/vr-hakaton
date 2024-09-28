@@ -16,7 +16,7 @@ const (
 )
 
 type Team struct {
-	ID       string        `json:"id" gorm:"type:uuid;not null;unique"`
+	ID       string        `json:"id" gorm:"type:string;not null;unique"`
 	TeamName string        `json:"team_name" gorm:"type:string;unique;not null"`
 	Link     string        `json:"link" gorm:"type:string"`
 	Track    Track         `json:"track" gorm:"type:string"`

@@ -11,10 +11,12 @@ import (
 )
 
 func Routes(r fiber.Router, db dbs.IDatabase, validator validator.Validate, eventBus *eventbus.EventBus) {
-  orderRepo := repository.NewOrderRepository(db)
-  orderService := service.NewOrderService(validator, orderRepo, eventBus)
-  orderHandler := NewOrderHandler(orderService)
+	orderRepo := repository.NewOrderRepository(db)
+	orderService := service.NewOrderService(validator, orderRepo, eventBus)
+	orderHandler := NewOrderHandler(orderService)
 
-  order := r.Group("order")
-  order.Post("/register", orderHandler.Register)
+	order := r.Group("order")
+	order.Post("/register", orderHandler.Register)
+	order.Put("/update/:id", orderHandler.Update)
+	order.Delete("/delete/:id", orderHandler.Delete)
 }

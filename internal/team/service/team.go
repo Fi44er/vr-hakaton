@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"root/internal/eventbus"
+	"root/internal/team/dto"
 	"root/internal/team/model"
 	"root/internal/team/repository"
 	"root/pkg/response"
+	"root/pkg/utils"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2/log"
@@ -15,6 +17,9 @@ import (
 type ITeamService interface {
 	HandleOrderRegistred(event interface{})
 	GetWhithPreload(ctx context.Context, name string) (*model.Team, error)
+	GetAll(ctx context.Context) ([]*model.Team, error)
+	Update(ctx context.Context, id string, req *dto.UpdateTeamReq) (*model.Team, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type TeamService struct {
@@ -76,7 +81,20 @@ func (s *TeamService) HandleOrderRegistred(event interface{}) {
 				message := fmt.Sprintf("the team %s is staffed", e.TeamName)
 				e.ResultChan <- eventbus.Result{Team: nil, Error: &response.ErrorResponse{StatusCode: 409, Message: message, Err: nil}}
 				return
+			}
 
+			captains := false
+			for _, order := range team.Orders {
+				if order.Role == "captain" {
+					captains = true
+					break
+				}
+			}
+
+			if e.OrderRole == "captain" && captains {
+				message := "the captain already exists"
+				e.ResultChan <- eventbus.Result{Team: nil, Error: &response.ErrorResponse{StatusCode: 409, Message: message, Err: nil}}
+				return
 			}
 
 			e.ResultChan <- eventbus.Result{Team: existingTeam, Error: nil}
@@ -93,4 +111,47 @@ func (s *TeamService) GetWhithPreload(ctx context.Context, name string) (*model.
 		return nil, &response.ErrorResponse{StatusCode: 404, Message: "Team not found", Err: nil}
 	}
 	return team, nil
+}
+
+func (s *TeamService) GetAll(ctx context.Context) ([]*model.Team, error) {
+	teams, err := s.repo.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(teams) == 0 {
+		return nil, &response.ErrorResponse{StatusCode: 404, Message: "Team not found", Err: nil}
+	}
+
+	return teams, nil
+}
+
+func (s TeamService) Update(ctx context.Context, id string, req *dto.UpdateTeamReq) (*model.Team, error) {
+	team, err := s.repo.GetById(ctx, id)
+	if err != nil {
+		log.Errorf("Update.GetById fail, id: %s, error: %s", id, err)
+		return nil, err
+	}
+
+	if team.ID == "" {
+		return nil, &response.ErrorResponse{StatusCode: 404, Message: "Team not found", Err: err}
+	}
+
+	utils.Copy(team, req)
+
+	if err := s.repo.Update(ctx, team); err != nil {
+		log.Errorf("Update fail, id: %s, error: %s", id, err)
+		return nil, err
+	}
+
+	return team, nil
+}
+
+func (s TeamService) Delete(ctx context.Context, id string) error {
+	if err := s.repo.Delete(ctx, id); err != nil {
+		log.Errorf("Delete fail, id: %s, error: %s", id, err)
+		return err
+	}
+
+	return nil
 }

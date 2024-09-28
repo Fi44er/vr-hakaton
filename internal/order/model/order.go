@@ -14,13 +14,13 @@ const (
 )
 
 type Order struct {
-	ID          string `json:"id" gorm:"type:uuid;unique;not null;index;primary_key"`
+	ID          string `json:"id" gorm:"type:string;unique;not null;index;primary_key"`
 	FIO         string `json:"fio" gorm:"type:string;not null"`
 	Age         int    `json:"age" gorm:"type:int;not null"`
 	Role        Role   `json:"role" gorm:"type:string;not null"`
 	PhoneNumber string `json:"phone_number" gorm:"type:string;unique;not null"`
 	Email       string `json:"email" gorm:"type:string;not null"`
-	TeamID      string `json:"team_id" gorm:"type:uuid;not null;index"`
+	TeamID      string `json:"team_id" gorm:"type:string;not null;index"`
 }
 
 func (order *Order) BeforeCreate(tx *gorm.DB) error {

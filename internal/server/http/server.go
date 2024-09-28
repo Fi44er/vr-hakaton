@@ -34,21 +34,14 @@ func NewServer(validator validator.Validate, db dbs.IDatabase, eventBus *eventbu
 }
 
 func (s Server) Run() error {
-	// if s.cfg.Environment == config.ProductionEnv {
-	//	s.app.Config().Production = true
-	// }
-
 	s.app.Use(cors.New(cors.Config{
 		AllowOrigins: "*", // allow requests from your frontend
-		// AllowMethods: "GET,POST,HEAD,PUT,DELETE,OPTIONS",
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
 	if err := s.MapRoutes(); err != nil {
 		log.Fatalf("MapRoutes Error: %v", err)
 	}
-
-	// s.app.Get("/swagger/*any", fiberSwagger.WrapHandler(swaggerFiles.Handler))
 
 	s.app.Get("/health", func(c *fiber.Ctx) error {
 		response.JSON(c, 200, nil)
@@ -69,7 +62,6 @@ func (s Server) GetApp() *fiber.App {
 
 func (s Server) MapRoutes() error {
 	v1 := s.app.Group("/api/v1")
-	// userHttp.Routes(v1, s.db, s.validator)
 	orderHTTP.Routes(v1, s.db, s.validator, s.eventBus)
 	teamHTTP.Routes(v1, s.db, s.validator, s.eventBus)
 	return nil
