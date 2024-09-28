@@ -16,10 +16,13 @@ import (
 
 const ORGANIZER_EMAIL = "ekaterina.dubskaya@yandex.ru"
 
+// const ORGANIZER_EMAIL = "fakeroot94@gmail.com"
+
 type IOrderService interface {
 	Register(ctx context.Context, req *dto.RegisterReq) (*model.Order, error)
 	Update(ctx context.Context, id string, req *dto.UpdateOrderReq) (*model.Order, error)
 	Delete(ctx context.Context, id string) error
+	GetAll(ctx context.Context) ([]*model.Order, error)
 }
 
 type OrderService struct {
@@ -91,7 +94,7 @@ func (s *OrderService) Register(ctx context.Context, req *dto.RegisterReq) (*mod
 		return nil, err
 	}
 
-	mailer.Mailer([]string{req.Email, ORGANIZER_EMAIL}, req.FIO, req.TeamName, order.TeamID)
+	mailer.Mailer([]string{req.Email, ORGANIZER_EMAIL}, req.FIO, req.TeamName, order.TeamID, req.Email, req.PhoneNumber, string(req.Role))
 
 	return order, nil
 }
@@ -135,4 +138,17 @@ func (s *OrderService) Delete(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (s *OrderService) GetAll(ctx context.Context) ([]*model.Order, error) {
+	orders, err := s.repo.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(orders) == 0 {
+		return nil, &response.ErrorResponse{StatusCode: 404, Message: "Order not found", Err: nil}
+	}
+
+	return orders, nil
 }

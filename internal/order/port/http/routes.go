@@ -19,4 +19,5 @@ func Routes(r fiber.Router, db dbs.IDatabase, validator validator.Validate, even
 	order.Post("/register", orderHandler.Register)
 	order.Put("/update/:id", orderHandler.Update)
 	order.Delete("/delete/:id", orderHandler.Delete)
+	order.Get("/get-all", orderHandler.GetAll)
 }

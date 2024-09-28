@@ -69,3 +69,16 @@ func (h *OrderHandler) Delete(ctx *fiber.Ctx) error {
 
 	return response.JSON(ctx, 200, "OK")
 }
+
+func (h *OrderHandler) GetAll(ctx *fiber.Ctx) error {
+	context := ctx.UserContext()
+
+	orders, err := h.service.GetAll(context)
+	if err != nil {
+		code, message := response.GetErroField(err)
+		log.Error("Failed to getAll orders: ", err)
+		return response.Error(ctx, code, err, message)
+	}
+
+	return response.JSON(ctx, 200, orders)
+}

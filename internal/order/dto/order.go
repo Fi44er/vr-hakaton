@@ -17,6 +17,6 @@ type RegisterReq struct {
 
 type UpdateOrderReq struct {
 	FIO         string `json:"fio,omitempty"`
-	PhoneNumber string `json:"phone_number,omitempty"`
-	Email       string `json:"email,omitempty"`
+	PhoneNumber string `json:"phone_number,omitempty" validate:"required,e164"`
+	Email       string `json:"email,omitempty" validate:"required,email"`
 }

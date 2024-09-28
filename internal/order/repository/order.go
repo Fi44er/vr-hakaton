@@ -12,6 +12,7 @@ type IOrderRepository interface {
 	FindByEmailOrPhone(ctx context.Context, email string, phone string) (*model.Order, error)
 	Update(ctx context.Context, req *model.Order) error
 	Delete(ctx context.Context, id string) error
+	FindAll(ctx context.Context) ([]*model.Order, error)
 }
 
 type OrderRepo struct {
@@ -57,4 +58,12 @@ func (r *OrderRepo) Delete(ctx context.Context, id string) error {
 	order := new(model.Order)
 	query := dbs.NewQuery("id = ?", id)
 	return r.db.Delete(ctx, order, dbs.WithQuery(query))
+}
+
+func (r *OrderRepo) FindAll(ctx context.Context) ([]*model.Order, error) {
+	orders := make([]*model.Order, 0)
+	if err := r.db.Find(ctx, &orders); err != nil {
+		return nil, err
+	}
+	return orders, nil
 }
