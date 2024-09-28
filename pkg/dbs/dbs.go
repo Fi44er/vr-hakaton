@@ -115,7 +115,6 @@ func (d *Database) Find(ctx context.Context, result any, opts ...FindOption) err
 	defer cancel()
 
 	query := d.applyOptions(opts...)
-	query = query.Debug()
 	if err := query.Find(result).Error; err != nil {
 		return err
 	}
